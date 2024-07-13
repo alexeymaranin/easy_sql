@@ -1,5 +1,5 @@
 import sql_query
-from collections import OrderedDict
+
 
 order = ['SELECT', 'FROM', 'INNER JOIN', 'WHERE', 'GROUP BY', 'HAVING', 'ORDER BY', 'LIMIT']
 
@@ -11,15 +11,15 @@ class BaseModel:
     fk = ((None, ''),)
 
     def __init__(self):
-        self.operators = OrderedDict({'SELECT': '',
-                                      'FROM': '',
-                                      'INNER JOIN': '',
-                                      'WHERE': '',
-                                      'GROUP BY': '',
-                                      'HAVING': '',
-                                      'ORDER BY': '',
-                                      'LIMIT': '',
-                                      })
+        self.operators = {'SELECT': '',
+                          'FROM': '',
+                          'INNER JOIN': '',
+                          'WHERE': '',
+                          'GROUP BY': '',
+                          'HAVING': '',
+                          'ORDER BY': '',
+                          'LIMIT': '',
+                          }
         self.select_fields = []
         self.filters = []
         self.limit_value = 0
