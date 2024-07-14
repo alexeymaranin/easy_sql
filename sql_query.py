@@ -55,13 +55,30 @@ class Where:
 
     def make_filter_sql_string(self):
         sql_filter = ' WHERE '
+        # iter filters for every table
         for i in range(len(self.filters)):
             table_name = 'cmp' + str(i + 1)
+            # iter all fields with values
+            """ Need to refactor this!!! """
             for item in self.filters[i]:
-                filter_value, operator = self.get_item_and_operator(self.filters[i][item])
-                item_parameter = self.convert_types_to_string(filter_value)
-                item_field = FIELD_MODIFYER + item if item not in SYSTEM_FIELDS else item
-                sql_filter += '''{}."{}" {} {} AND '''.format(table_name, item_field, operator, item_parameter)
+                if '_IN' in item:
+                    item_parameter = str(tuple(self.filters[i][item]))
+                    operator = 'IN'
+                    item_field = item.replace('_IN', '')
+                    item_field = FIELD_MODIFYER + item_field if item_field not in SYSTEM_FIELDS else item_field
+                    sql_filter += '''{}."{}" {} {} AND '''.format(table_name, item_field, operator, item_parameter)
+                else:
+                    if type(self.filters[i][item]) is list:
+                        for filter_item in self.filters[i][item]:
+                            filter_value, operator = self.get_item_and_operator(filter_item)
+                            item_parameter = self.convert_types_to_string(filter_value)
+                            item_field = FIELD_MODIFYER + item if item not in SYSTEM_FIELDS else item
+                            sql_filter += '''{}."{}" {} {} AND '''.format(table_name, item_field, operator, item_parameter)
+                    else:
+                        filter_value, operator = self.get_item_and_operator(self.filters[i][item])
+                        item_parameter = self.convert_types_to_string(filter_value)
+                        item_field = FIELD_MODIFYER + item if item not in SYSTEM_FIELDS else item
+                        sql_filter += '''{}."{}" {} {} AND '''.format(table_name, item_field, operator, item_parameter)
 
         sql_filter = sql_filter[:-4]
 

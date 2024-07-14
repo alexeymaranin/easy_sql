@@ -1,0 +1,6 @@
+refactor WHERE class in make_filter_sql_string method
+add pytest tests
+add examples
+push to 3.5 branch actual version with refactor and tests
+add type hinting to master branch
+add documentation
