@@ -1,6 +1,6 @@
 
 SYSTEM_FIELDS = ("Id", "CreatedDate", "UpdatedDate", "Data", "CreatorSubject", "ChangeAuthor", "IsDelMark")
-FIELD_MODIFYER = "Data_"
+FIELD_MODIFIER = "Data_"
 
 
 class Select:
@@ -22,8 +22,8 @@ class Select:
         select_list = self.get_fields()
         sql_fields = 'SELECT '
         for item in select_list:
-            field = FIELD_MODIFYER + item[1] if item[1] not in SYSTEM_FIELDS else item[1]
-            sql_fields += '{}."{}" as "{}", '.format(item[0], field, item[1])
+            field = FIELD_MODIFIER + item[1] if item[1] not in SYSTEM_FIELDS else item[1]
+            sql_fields += f'{item[0]}."{field}" as "{item[1]}", '
 
         sql_fields = sql_fields[:-2]
 
@@ -38,7 +38,7 @@ class From:
         self.table = table
 
     def make_table_sql_string(self):
-        sql_table = ' FROM "{}" as cmp1'.format(self.table)
+        sql_table = f' FROM "{self.table}" as cmp1'
 
         return sql_table
 
@@ -59,29 +59,37 @@ class Where:
         for i in range(len(self.filters)):
             table_name = 'cmp' + str(i + 1)
             # iter all fields with values
-            """ Need to refactor this!!! """
             for item in self.filters[i]:
-                if '_IN' in item:
-                    item_parameter = str(tuple(self.filters[i][item]))
-                    operator = 'IN'
-                    item_field = item.replace('_IN', '')
-                    item_field = FIELD_MODIFYER + item_field if item_field not in SYSTEM_FIELDS else item_field
-                    sql_filter += '''{}."{}" {} {} AND '''.format(table_name, item_field, operator, item_parameter)
-                else:
-                    if type(self.filters[i][item]) is list:
-                        for filter_item in self.filters[i][item]:
-                            filter_value, operator = self.get_item_and_operator(filter_item)
-                            item_parameter = self.convert_types_to_string(filter_value)
-                            item_field = FIELD_MODIFYER + item if item not in SYSTEM_FIELDS else item
-                            sql_filter += '''{}."{}" {} {} AND '''.format(table_name, item_field, operator, item_parameter)
-                    else:
-                        filter_value, operator = self.get_item_and_operator(self.filters[i][item])
-                        item_parameter = self.convert_types_to_string(filter_value)
-                        item_field = FIELD_MODIFYER + item if item not in SYSTEM_FIELDS else item
-                        sql_filter += '''{}."{}" {} {} AND '''.format(table_name, item_field, operator, item_parameter)
+                sql_filter += self.create_filter_condition(item, table_name, i)
 
         sql_filter = sql_filter[:-4]
 
+        return sql_filter
+
+    def create_filter_condition(self, item, table_name, iter_number):
+        sql_filter = ''
+        if '_IN' in item:
+            item_parameter = str(tuple(self.filters[iter_number][item]))
+            operator = 'IN'
+            item_field = item.replace('_IN', '')
+            sql_filter = self.create_filter_condition_string(table_name, item_field, operator, item_parameter)
+        else:
+            if type(self.filters[iter_number][item]) is list:
+                for filter_item in self.filters[iter_number][item]:
+                    item_parameter, operator = self.get_item_and_operator(filter_item)
+                    item_parameter = self.convert_types_to_string(item_parameter)
+                    sql_filter = self.create_filter_condition_string(table_name, item, operator, item_parameter)
+            else:
+                item_parameter, operator = self.get_item_and_operator(self.filters[iter_number][item])
+                item_parameter = self.convert_types_to_string(item_parameter)
+                sql_filter = self.create_filter_condition_string(table_name, item, operator, item_parameter)
+
+        return sql_filter
+
+    @staticmethod
+    def create_filter_condition_string(table_name, item_field, operator, item_parameter):
+        item_field = FIELD_MODIFIER + item_field if item_field not in SYSTEM_FIELDS else item_field
+        sql_filter = f'''{table_name}."{item_field}" {operator} {item_parameter} AND '''
         return sql_filter
 
     @staticmethod
@@ -134,8 +142,8 @@ class InnerJoin:
         sql_table = ''
         count = 2
         for join in self.join_on:
-            main_field = FIELD_MODIFYER + self.join_on[join][0] if self.join_on[join][0] not in SYSTEM_FIELDS else self.join_on[join][0]
-            join_field = FIELD_MODIFYER + self.join_on[join][1] if self.join_on[join][1] not in SYSTEM_FIELDS else self.join_on[join][1]
+            main_field = FIELD_MODIFIER + self.join_on[join][0] if self.join_on[join][0] not in SYSTEM_FIELDS else self.join_on[join][0]
+            join_field = FIELD_MODIFIER + self.join_on[join][1] if self.join_on[join][1] not in SYSTEM_FIELDS else self.join_on[join][1]
             sql_table += ' INNER JOIN "{}" as cmp{} ON cmp1."{}" = cmp{}."{}"'.format(join, count, main_field, count, join_field)
             count += 1
         return sql_table
@@ -168,7 +176,7 @@ class OrderBy:
         else:
             ordering = 'ASC'
 
-        self.order_by = FIELD_MODIFYER + self.order_by if self.order_by not in SYSTEM_FIELDS else self.order_by
+        self.order_by = FIELD_MODIFIER + self.order_by if self.order_by not in SYSTEM_FIELDS else self.order_by
         sql = ' ORDER BY "{}" {}'.format(self.order_by, ordering)
 
         return sql
