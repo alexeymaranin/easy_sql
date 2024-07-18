@@ -82,7 +82,7 @@ class BaseModel:
 
         return self
 
-    def only(self, only_fields):
+    def only(self, *only_fields):
         if not isinstance(only_fields[0], (list, tuple)):
             only_fields = (only_fields,)
 

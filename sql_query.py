@@ -75,10 +75,11 @@ class Where:
             sql_filter = self.create_filter_condition_string(table_name, item_field, operator, item_parameter)
         else:
             if type(self.filters[iter_number][item]) is list:
+                sql_filter = ''
                 for filter_item in self.filters[iter_number][item]:
                     item_parameter, operator = self.get_item_and_operator(filter_item)
                     item_parameter = self.convert_types_to_string(item_parameter)
-                    sql_filter = self.create_filter_condition_string(table_name, item, operator, item_parameter)
+                    sql_filter += self.create_filter_condition_string(table_name, item, operator, item_parameter)
             else:
                 item_parameter, operator = self.get_item_and_operator(self.filters[iter_number][item])
                 item_parameter = self.convert_types_to_string(item_parameter)
