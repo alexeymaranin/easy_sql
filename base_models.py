@@ -21,7 +21,7 @@ class BaseModel:
                                       'LIMIT': '',
                                       })
         self.select_fields = []
-        self.filters = []
+        self.filters = [{},]
         self.limit_value = 0
         self.join_on = {}
         self.order_field = ''
@@ -31,7 +31,8 @@ class BaseModel:
         self.operators["SELECT"] = sql_query.Select(fields).get_sql()
         self.operators["FROM"] = sql_query.From(self.component).get_sql()
         if self.filters:
-            self.filters[0].update({"IsDelMark": False})
+            for filt in self.filters:
+                filt.update({"IsDelMark": False})
             self.operators["WHERE"] = sql_query.Where(tuple(self.filters)).get_sql()
         if self.limit_value:
             self.operators["LIMIT"] = sql_query.Limit(self.limit_value).get_sql()
@@ -77,7 +78,7 @@ class BaseModel:
 
         # self._select()
 
-        self._filter(filters)
+        self._filter(filters, clear=True)
         self._limit(1)
 
         return self
@@ -134,6 +135,7 @@ class BaseModel:
             model, field_join = obj
             join_on[model.component] = (field_join, model.pk)
             fields_join.append(tuple(model.fields))
+            self.filters.append({})
 
         self.select_fields += fields_join
         self.join_on = join_on
