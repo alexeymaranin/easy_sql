@@ -1,6 +1,11 @@
 (done)refactor WHERE class in make_filter_sql_string method
 (done)add pytest tests base sql
 (done)add pytest tests for models
+
+solve 2 problems:
+    Id_16
+    Join is dict
+
 add examples
 push to 3.5 branch actual version with refactor and tests
 add type hinting to master branch
