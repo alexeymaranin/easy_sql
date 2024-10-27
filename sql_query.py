@@ -23,7 +23,8 @@ class Select:
         sql_fields = 'SELECT '
         for item in select_list:
             field = FIELD_MODIFIER + item[1] if item[1] not in SYSTEM_FIELDS else item[1]
-            sql_fields += f'{item[0]}."{field}" as "{item[1]}", '
+            field_as = f'{item[0]}_{item[1]}' if item[0] != 'cmp1' and item[1] in SYSTEM_FIELDS else item[1]
+            sql_fields += f'{item[0]}."{field}" as "{field_as}", '
 
         sql_fields = sql_fields[:-2]
 
